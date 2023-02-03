@@ -7,9 +7,9 @@
     "readme": "",
     "time": "2020-12-25",
     "support":{
-        "issues": "hhttps://github.com/ikoncoders/IkonizerCore/issues",
-        "source": "https://github.com/ikoncoders/IkonizerCore",
-        "wiki": "https://github.com/ikoncoders/IkonizerCore/wiki"
+        "issues": "https://github.com/ikoncoders/ikonizercore/issues",
+        "source": "https://github.com/ikoncoders/ikonizercore",
+        "wiki"  : "https://github.com/ikoncoders/ikonizercore/wiki"
     },   
     "authors": [
         {
