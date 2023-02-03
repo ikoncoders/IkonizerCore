@@ -1,0 +1,215 @@
+<?php
+declare(strict_types=1);
+
+namespace IkonizerCore\UserManager;
+
+use IkonizerCore\Auth\Roles\PrivilegedUser;
+use IkonizerCore\Datatable\AbstractDatatableColumn;
+use IkonizerCore\Datatable\DataColumnTrait;
+use IkonizerCore\IconLibrary;
+
+class UserColumn extends AbstractDatatableColumn
+{
+
+    use DataColumnTrait;
+
+    private string $controller = 'user';
+
+    /**
+     * @param array $dbColumns
+     * @param object|null $callingController
+     * @return array[]
+     */
+    public function columns(array $dbColumns = [], object|null $callingController = null): array
+    {
+        return [
+            [
+                'db_row' => 'ID',
+                'dt_row' => 'ID',
+                'class' => 'uk-table-shrink',
+                'show_column' => true,
+                'sortable' => false,
+                'searchable' => true,
+                'formatter' => function ($row) {
+                    return '<input type="checkbox" class="uk-checkbox" id="users-' . $row['id'] . '" name="id[]" value="' . $row['id'] . '">';
+                }
+            ],
+            [
+                'db_row' => 'firstname',
+                'dt_row' => 'Name',
+                'class' => 'uk-table-expand',
+                'show_column' => true,
+                'sortable' => false,
+                'searchable' => true,
+                'formatter' => function ($row) use ($callingController) {
+                    $privilege = PrivilegedUser::getUser($row['id']);
+                    $html = '<div class="uk-clearfix">';
+                    $html .= '<div class="uk-float-left">';
+                    $html .= '<img src="' . $row["gravatar"] . '" width="40" class="uk-border-circle">';
+                    $html .= '</div>';
+                    $html .= '<div class="uk-float-left uk-margin-small-right">';
+                    $html .= '<div>' . $this->displayStatus($callingController, $row) . '</div>';
+                    // $html .= '<div><a uk-tooltip="' . (!$privilege->getRole() ? 'No Role Assigned' : $privilege->getRole()) . '" href=""><ion-icon name="' . (!$privilege->getRole() ? 'alert-outline' : 'person-outline') . '"></ion-icon></a></div>';
+                    $html .= '<div><a uk-tooltip="' . (!$privilege->getRole() ? 'No Role Assigned' : $privilege->getRole()) . '" href="">' . IconLibrary::getIcon((!$privilege->getRole() ? 'warning' : 'user'), 0.7) . '</a></div>';
+
+                    $html .= '<div></div>';
+                    $html .= '</div>';
+                    $html .= '<div class="uk-float-left">';
+                    $html .= $row["firstname"] . ' ' . $row["lastname"] . "<br/>";
+                    $html .= '<div><small>' . $row["email"] . '</small></div>';
+                    $html .= '</div>';
+                    $html .= '</div>';
+                    return $html;
+                }
+            ],
+            [
+                'db_row' => 'lastname',
+                'dt_row' => 'Lastname',
+                'class' => '',
+                'show_column' => false,
+                'sortable' => false,
+                'searchable' => true,
+                'formatter' => ''
+            ],
+            [
+                'db_row' => 'email',
+                'dt_row' => 'Email Address',
+                'class' => '',
+                'show_column' => false,
+                'sortable' => false,
+                'searchable' => true,
+                'formatter' => ''
+            ],
+            [
+                'db_row' => 'status',
+                'dt_row' => 'Status',
+                'class' => '',
+                'show_column' => false,
+                'sortable' => false,
+                'searchable' => false,
+                'formatter' => ''
+            ],
+            [
+                'db_row' => 'created_at',
+                'dt_row' => 'Published',
+                'class' => '',
+                'show_column' => true,
+                'sortable' => true,
+                'searchable' => false,
+                'formatter' => function ($row, $tempExt) {
+                    $html = $tempExt->tableDateFormat($row, "created_at", true);
+                    $html .= '<br/><small>' . $row['firstname'] . '</small>';
+                    return $html;
+                }
+            ],
+            [
+                'db_row' => 'modified_at',
+                'dt_row' => 'Last Modified',
+                'class' => '',
+                'show_column' => true,
+                'sortable' => true,
+                'searchable' => false,
+                'formatter' => function ($row, $tempExt) {
+                    $html = '';
+                    if (isset($row["modified_at"]) && $row["modified_at"] != null) {
+                        //$html .= "$tempExt->getUserById($row[$row_name]);"
+                        $html .= $tempExt->tableDateFormat($row, "modified_at", true);
+                        $html .= '<div><small>By Admin</small></div>';
+                    } else {
+                        $html .= '<small>Never!</small>';
+                    }
+                    return $html;
+                }
+            ],
+            [
+                'db_row' => 'gravatar',
+                'dt_row' => 'Thumbnail',
+                'class' => '',
+                'show_column' => false,
+                'sortable' => false,
+                'searchable' => false,
+                'formatter' => ''
+            ],
+            [
+                'db_row' => 'ip',
+                'dt_row' => 'IP',
+                'class' => 'uk-table-shrink',
+                'show_column' => true,
+                'sortable' => false,
+                'searchable' => false,
+                'formatter' => function ($row, $tempExt) {
+                    return sprintf('<span uk-tooltip="%s">%s</span>', $row['remote_addr'], IconLibrary::getIcon('location', 1.5));
+                }
+            ],
+            [
+                'db_row' => '',
+                'dt_row' => 'Action',
+                'class' => '',
+                'show_column' => true,
+                'sortable' => false,
+                'searchable' => false,
+                'formatter' => function ($row, $tempExt) {
+                    return $tempExt->action(
+                        [
+                            'more' => [
+                                'icon' => 'more',
+                                'callback' => function ($row, $tempExt) {
+                                    return $tempExt->getDropdown(
+                                        $this->columnActions($row, $this->controller),
+                                        $this->getDropdownStatus($row),
+                                        $row,
+                                        $this->controller,
+                                        ['basic_access']
+                                    );
+                                }
+                            ],
+                        ],
+                        $row,
+                        $tempExt,
+                        $this->controller,
+                        false,
+                        'Are You Sure!',
+                        "You are about to carry out an irreversable action. Are you sure you want to delete <strong class=\"uk-text-danger\">{$row['firstname']}</strong> account.",
+                    );
+                }
+            ],
+
+        ];
+    }
+
+    /**
+     * @inheritDoc
+     *
+     * @param array $row
+     * @param string|null $controller
+     * @param object|null $tempExt
+     * @return array
+     */
+    public function columnActions(array $row = [], ?string $controller = null, ?object $tempExt = null): array
+    {
+        return $this->filterColumnActions(
+            $row, 
+            $this->columnBasicLinks($this), /* can merge additional links here to this column */
+            $controller
+        );
+    }
+
+    /**
+     * @inheritDoc
+     * @return array
+     */
+    private function moreLinks(): array
+    {
+        return [
+            'notes' => ['name' => 'add notes', 'icon' => 'file'],            
+            'privilege' => ['name' => 'Edit Privilege', 'icon' => 'settings'],
+            'preferences' => ['name' => 'Edit Preferences', 'icon' => 'nut'],
+            'show' => ['name' => 'show', 'icon' => 'world'],
+            'clone' => ['name' => 'clone', 'icon' => 'copy'],
+            'lock' => ['name' => 'lock account', 'icon' => 'lock'],
+        ];
+    }
+
+
+
+}

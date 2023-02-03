@@ -1,0 +1,10 @@
+<?php
+declare(strict_types=1);
+
+namespace IkonizerCore\Cache\Exception;
+
+use IkonizerCore\Base\Exception\BaseInvalidArgumentException;
+
+class CacheInvalidArgumentException extends BaseInvalidArgumentException
+{
+}

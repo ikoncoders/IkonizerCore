@@ -1,0 +1,255 @@
+services:
+  subscribers:
+    user.subscriber:
+      class: \MagmaCore\UserManager\EventSubscriber\UserActionSubscriber
+      register_route_feedback:
+        MagmaCore\UserManager\UserController::newAction:
+          msg: New user added!
+        MagmaCore\UserManager\UserController::editAction:
+          msg: Changes saved!
+        MagmaCore\UserManager\UserController::hardDeleteAction:
+          msg: User deleted successfully!
+          redirect: user.index
+        MagmaCore\UserManager\UserController::trashAction:
+          msg: Account is in located within the trash!
+          redirect: user.index
+        MagmaCore\UserManager\UserController::untrashAction:
+          msg: Account removed from trash!
+          redirect: user.index
+        MagmaCore\UserManager\UserController::trashRestoreAction:
+          msg: Account restored from trash!
+          redirect: user.index
+        MagmaCore\UserManager\UserController::lockAction:
+          msg: User account is now locked
+          redirect: user.index
+        MagmaCore\UserManager\UserController::unlockAction:
+          msg: User account is is now unlocked
+          redirect: user.index
+        MagmaCore\UserManager\UserController::activeAction:
+          msg: User account is now active
+          redirect: user.index
+        MagmaCore\UserManager\UserController::cloneAction:
+          msg: Item cloned successfully.
+          redirect: user.index
+        MagmaCore\UserManager\UserController::preferencesAction:
+          msg: Preferences updated successfully.
+        App\Controller\RegistrationController::registerAction:
+          msg: Your account was created!
+
+    group.subscriber:
+      class: \MagmaCore\UserManager\Rbac\Group\EventSubscriber\GroupActionSubscriber
+      register_route_feedback:
+        MagmaCore\UserManager\Rbac\Group\GroupController::newAction:
+          msg: New Group Added!
+        MagmaCore\UserManager\Rbac\Group\GroupController::editAction:
+          msg: Group updated!
+        MagmaCore\UserManager\Rbac\Group\GroupController::deleteAction:
+          msg: Group Deleted!
+          redirect: group.index
+        MagmaCore\UserManager\Rbac\Group\GroupController::hardDeleteAction:
+          msg: Group Deleted!
+          redirect: group.index
+
+    role.subscriber:
+      class: \MagmaCore\UserManager\Rbac\Role\EventSubscriber\RoleActionSubscriber
+      register_route_feedback:
+        MagmaCore\UserManager\Rbac\Role\RoleController::newAction:
+          msg: New Role Added!
+        MagmaCore\UserManager\Rbac\Role\RoleController::editAction:
+          msg: Role updated!
+        MagmaCore\UserManager\Rbac\Role\RoleController::hardDeleteAction:
+          msg: Role deleted!
+          redirect: role.index
+        MagmaCore\UserManager\Rbac\Role\RoleController::trashAction:
+          msg: item trash successfully!
+          redirect: role.index
+        MagmaCore\UserManager\Rbac\Role\RoleController::untrashAction:
+          msg: item remove from trash successfully!
+          redirect: role.index
+        MagmaCore\UserManager\Rbac\Role\RoleController::assignedAction:
+          msg: New permission successfully assigned to role.
+
+
+    role_permission_assigned.subscriber:
+      class: \MagmaCore\UserManager\Rbac\EventSubscriber\RolePermissionAssignedActionSubscriber
+      register_route_feedback:
+        MagmaCore\UserManager\Rbac\Role\RoleController::assignedAction:
+          msg: Changes Saved
+
+    permission.subscriber:
+      class: \MagmaCore\UserManager\Rbac\Permission\EventSubscriber\PermissionActionSubscriber
+      register_route_feedback:
+        MagmaCore\UserManager\Rbac\Permission\PermissionController::newAction:
+          msg: New permission added!
+        MagmaCore\UserManager\Rbac\Permission\PermissionController::editAction:
+          msg: Permission updated!
+        MagmaCore\UserManager\Rbac\Permission\PermissionController::hardDeleteAction:
+          msg: Permission deleted!
+          redirect: permission.index
+        MagmaCore\UserManager\Rbac\Permission\PermissionController::trashAction:
+          msg: item trash successfully!
+          redirect: permission.index
+        MagmaCore\UserManager\Rbac\Permission\PermissionController::untrashAction:
+          msg: item remove from trash successfully!
+          redirect: permission.index
+
+    userRole.subscriber:
+      class: \MagmaCore\UserManager\EventSubscriber\UserRoleActionSubscriber
+    userPreference.subscriber:
+      class: \MagmaCore\UserManager\EventSubscriber\UserPreferenceActionSubscriber
+
+    security.subscriber:
+      class: \MagmaCore\UserManager\Security\EventSubscriber\LoginActionSubscriber
+      register_route_feedback:
+        MagmaCore\UserManager\Security\SecurityController::indexAction:
+          msg: Welcome back!
+
+    logout.subscriber:
+      class: \MagmaCore\UserManager\Security\EventSubscriber\LogoutActionSubscriber
+      register_route_feedback:
+        MagmaCore\UserManager\Security\LogoutController::logoutAction:
+          msg: You've successfully logged out!
+
+    password.subscriber:
+      class: \MagmaCore\UserManager\PasswordRecovery\EventSubscriber\PasswordActionSubscriber
+      register_route_feedback:
+        MagmaCore\UserManager\PasswordRecovery\PasswordController::forgotAction:
+          msg: Your request was successful. Please check your email address for reset link!
+        MagmaCore\UserManager\PasswordRecovery\PasswordController::resetAction:
+          msg: Password reset successfully.
+
+    activation.subscriber:
+      class: \MagmaCore\UserManager\Activation\EventSubscriber\ActivationActionSubscriber
+      register_route_feedback:
+        MagmaCore\UserManager\Activation\ActivationController::activateAction:
+          msg: You're now activated
+
+    registration.subscriber:
+      class: \MagmaCore\UserManager\Registration\EventSubscriber\RegistrationActionSubscriber
+      register_route_feedback:
+        MagmaCore\UserManager\Registration\RegistrationController::registerAction:
+          msg: You're now registered
+
+    setting.subscriber:
+      class: \MagmaCore\Settings\EventSubscriber\SettingActionSubscriber
+      register_route_feedback:
+        MagmaCore\Settings\SettingController::purgeAction:
+          msg: Changes Saved
+        MagmaCore\Settings\SettingController::generalAction:
+          msg: Changes Saved
+        MagmaCore\Settings\SettingController::localisationAction:
+          msg: New locale language file added successfully.
+
+    account.subscriber:
+      class: \App\EventSubscriber\UserProfileActionSubscriber
+      register_route_feedback:
+        App\Controller\Profile\AccountController::nameAction:
+          msg: Your name was changed successfully!
+        App\Controller\Profile\AccountController::emailAction:
+          msg: Your email was changed successfully!
+        App\Controller\Profile\AccountController::passwordAction:
+          msg: Your password was changed successfully!
+
+    menu.subscriber:
+      class: \MagmaCore\PanelMenu\EventSubscriber\MenuActionSubscriber
+      register_route_feedback:
+        MagmaCore\PanelMenu\MenuController::editAction:
+          msg: Changes Saved
+        MagmaCore\PanelMenu\MenuController::deleteAction:
+          msg: Menu deleted!
+          redirect: menu.index
+        MagmaCore\PanelMenu\MenuController::hardDeleteAction:
+          msg: Menu deleted!
+          redirect: menu.index
+        MagmaCore\PanelMenu\MenuController::trashAction:
+          msg: Item trashed successfully!
+          redirect: menu.index
+        MagmaCore\PanelMenu\MenuController::untrashAction:
+          msg: Item remove from trash successfully!
+          redirect: menu.index
+        MagmaCore\PanelMenu\MenuController::toggleAction:
+          msg: Item hidden from main navigation menu!
+          # By not defining the redirect key. the page will redirect using HTTP_REFERER
+        MagmaCore\PanelMenu\MenuController::untoggleAction:
+          msg: Item added to main navigation menu!
+        MagmaCore\PanelMenu\MenuController::quickEditAction:
+          msg: Updated successfully!
+          redirect: menu.index
+
+    message.subscriber:
+      class: \App\EventSubscriber\MessageActionSubscriber
+      register_route_feedback:
+        App\Controller\Admin\MessageController::starredAction:
+          msg: Changes Saved
+        App\Controller\Admin\MessageController::unstarredAction:
+          msg: Changes Saved
+        App\Controller\Admin\MessageController::markedAction:
+          msg: Changes Saved
+        App\Controller\Admin\MessageController::unmarkedAction:
+          msg: Changes Saved
+        App\Controller\Admin\MessageController::newAction:
+          msg: Message Sent
+
+    search.subscriber:
+      class: \App\EventSubscriber\SearchActionSubscriber
+#      register_route_feedback:
+#        App\Controller\Admin\SearchController::starredAction:
+#          msg: Changes Saved
+
+    ticket.subscriber:
+      class: \MagmaCore\Ticket\EventSubscriber\TicketActionSubscriber
+      register_route_feedback:
+        MagmaCore\Ticket\TicketController::newAction:
+          msg: New ticket added!
+        MagmaCore\Ticket\TicketController::editAction:
+          msg: Ticket updated!
+        MagmaCore\Ticket\TicketController::hardDeleteAction:
+          msg: Tikcet deleted!
+          redirect: ticket.index
+        MagmaCore\Ticket\TicketController::trashAction:
+          msg: item trash successfully!
+          redirect: ticket.index
+        MagmaCore\Ticket\TicketController::untrashAction:
+          msg: item remove from trash successfully!
+          redirect: ticket.index
+  
+    history.subscriber:
+      class: \MagmaCore\History\EventSubscriber\HistoryActionSubscriber
+      # register_route_feedback:
+      #   MagmaCore\Ticket\TicketController::untrashAction:
+      #     msg: item remove from trash successfully!
+      #     redirect: ticket.index
+
+
+    notification.subscriber:
+      class: \MagmaCore\Notification\EventSubscriber\NotificationActionSubscriber
+      register_route_feedback:
+        MagmaCore\Notification\NotificationController::newAction:
+          msg: New ticket added!
+
+
+    ########################## CORE SYSTEM EVENTS ##########################
+    base_controller_action.subscriber:
+      class: \MagmaCore\Base\EventSubscriber\BeforeControllerActionSubscriber
+    base_render_action.subscriber:
+      class: \MagmaCore\Base\EventSubscriber\BeforeRenderActionSubscriber
+    system_action_event:
+      class: \MagmaCore\System\Subscriber\SystemActionSubscriber
+    controllerSettings.subscriber:
+      class: \MagmaCore\Settings\EventSubscriber\ControllerSettingActionSubscriber
+
+    # base_bulk_action.subscriber:
+    #   class: \MagmaCore\Base\EventSubscriber\BulkActionSubscriber
+    #   register_route_feedback:
+    #     MagmaCore\UserManager\UserController::bulkDeleteAction:
+    #       msg: Multiple items deleted successfully.
+    #       redirect: user.index
+    #     MagmaCore\UserManager\UserController::bulkCloneAction:
+    #       msg: Multiple items cloned successfully.
+    #       redirect: user.index
+
+#  listeners:
+#    inertia.listener:
+#      class: \MagmaCore\Inertia\InertiaListener
+#      props:
+#        - { name: "app.event.listener.send_registration_email_listener", event: '' }

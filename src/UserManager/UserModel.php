@@ -1,0 +1,271 @@
+<?php
+declare(strict_types=1);
+
+namespace IkonizerCore\UserManager;
+
+use IkonizerCore\UserManager\Rbac\Role\RoleRelationship;
+use IkonizerCore\UserManager\Rbac\Role\RoleModel;
+use IkonizerCore\Auth\Contracts\UserSecurityInterface;
+use IkonizerCore\Auth\Roles\PrivilegeTrait;
+use IkonizerCore\Base\AbstractBaseModel;
+use IkonizerCore\Base\Exception\BaseInvalidArgumentException;
+use IkonizerCore\Utility\UtilityTrait;
+
+class UserModel extends AbstractBaseModel implements UserSecurityInterface
+{
+
+    use UtilityTrait;
+    use PrivilegeTrait;
+
+    /** @var string */
+    protected const TABLESCHEMA = 'users';
+    /** @var string */
+    protected const TABLESCHEMAID = 'id';
+    /** @var array - field casting */
+    protected array $cast = ['firstname' => 'array_json'];
+    /* @var array COLUMN_STATUS */
+    public const COLUMN_STATUS = ['status' => ['pending', 'active', 'trash', 'lock', '']];
+
+
+    /** @var array $fillable - an array of fields that should not be null */
+    protected array $fillable = [
+        'firstname',
+        'lastname',
+        'email',
+        'status',
+        'password_hash',
+        'created_byid',
+        'remote_addr',
+    ];
+    protected ?string $validatedHashPassword;
+    protected ?object $tokenRepository;
+
+    /** @var array - bulk action array properties */
+    protected array $unsettableClone = ['id', 'created_at', 'activation_token', 'password_reset_hash'];
+    protected array $cloneableKeys = ['firstname', 'lastname', 'email'];
+
+    /**
+     * Main constructor class which passes the relevant information to the
+     * base model parent constructor. This allows the repository to fetch the
+     * correct information from the database based on the model/entity
+     *
+     * @return void
+     * @throws BaseInvalidArgumentException
+     */
+    public function __construct()
+    {
+        parent::__construct(self::TABLESCHEMA, self::TABLESCHEMAID, UserEntity::class);
+        
+    }
+
+    /**
+     * Guard these IDs from being deleted etc..
+     *
+     * @return array
+     */
+    public function guardedID(): array
+    {
+        return [];
+    }
+
+    /**
+     * Return an array of column values if table supports the column field
+     *
+     * @return array
+     */
+    public function getColumnStatus(): array
+    {
+        return self::COLUMN_STATUS;
+    }
+
+    /**
+     * See if a user record already exists with the specified email
+     *
+     * @param string $email email address to search for
+     * @param int|null $ignoreID
+     * @return boolean  True if a record already exists with the specified email, false otherwise
+     */
+    public function emailExists(string $email, int $ignoreID = null): bool
+    {
+        if (!empty($email)) {
+            $result = $this->getRepo()->findObjectBy(['email' => $email], ['*']);
+            if ($result) {
+                if ($result->id != $ignoreID) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Return true if the user account is activated. ie. status is set to active
+     * returns false otherwise.
+     *
+     * @param string $email
+     * @return boolean
+     */
+    public function accountActive(string $email): bool
+    {
+        if (!empty($email)) {
+            $result = $this->getRepo()->findObjectBy(['email' => $email], ['status']);
+            if ($result) {
+                if ($result->status === 'active') {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Validate the new user password. Using the validate user object
+     * Once the password is validated it will then be hash using the
+     * passing hash from our traits services
+     *
+     * @param object $entityCollection - data returning from the user entity filtered and sanitized
+     * @param object|null $repository
+     * @return self
+     */
+    public function validatePassword(object $entityCollection, ?object $repository = null): static
+    {
+        $validate = $this->get('Validate.UserValidate', 'MagmaCore\UserManager\\')->validate($entityCollection, $repository);
+        if (empty($validate->errors)) {
+            $this->validatedHashPassword = password_hash(
+                $entityCollection->all()['password_hash'], 
+                constant($this->appSecurity('password_algo')['default']), 
+                $this->appSecurity('hash_cost_factor')
+            );
+            $this->tokenRepository = $repository;
+
+            return $this;
+        }
+    }
+
+    /**
+     * @param $id
+     * @return mixed
+     */
+    public function getNameForSelectField($id)
+    {
+        return $this->getOtherModel(RoleModel::class)->getNameForSelectField($id);
+    }
+
+    /**
+     * @return object
+     */
+    public function role(): object
+    {
+        return $this->getRelationship(RoleRelationship::class);
+    }
+
+    /**
+     * Return the user object based on the passed parameter
+     *
+     * @param integer $userID
+     * @return object|null
+     */
+    public function getUser(int $userID): ?object
+    {
+        if (empty($userID) || $userID === 0) {
+            throw new BaseInvalidArgumentException('Please add a valid user id');
+        }
+
+        $user = $this->getRepo()->findObjectBy(['id' => $userID]);
+        if ($user) {
+            return $user;
+        }
+
+        return null;
+    }
+
+    /**
+     * j
+     *
+     * @param object|null $userRole
+     * @param integer|null $queryID
+     * @return integer|null
+     */
+    public function getUserRoleID(object $userRole = null, int $queryID = null): ?int
+    {
+        $userRoleID = $userRole->getRepo()->findObjectBy(['user_id' => $queryID], ['role_id']);
+        if ($userRoleID !==null) {
+            return $userRoleID->role_id;
+        }
+
+        return null;
+
+    }
+
+    /**
+     * Returns the role name for the current queried user. This methods workd in conjunction with getUserRoleID()
+     * which the result of needs to be passed as the second argument for this method.
+     *
+     * @param object|null $role
+     * @param integer|null $roleID
+     * @return string|null
+     */
+    public function getUserRole(object $role = null, int $roleID = null): ?string
+    {
+        $roleName = $role->getRepo()->findObjectBy(['id' => $roleID], ['role_name']);
+        if ($roleName !==null) {
+            return $roleName->role_name;
+        }
+        return null;
+    }
+
+    public function getUserRolePermissions(int $roleID = null): ?array
+    {
+        $perms = $this->getPermissionByRoleID($roleID);
+        return $perms;
+    }
+
+    public function getUserData(array $selectors = [], array $conditions = []): ?array
+    {
+        $data = $this->getRepo()->findBy($selectors, $conditions);
+        if ($data !==null) {
+            return $data;
+        }
+        return null;
+
+    }
+
+    public function getUserCount(array $conditions = []): ?int
+    {
+        return $this->getRepo()->count($conditions);
+    }
+
+    /**
+     * Return an array of table column data which will be used to populate the tabs in the user datatable.
+     *
+     * @return array
+     */
+    public function tabDbSelectors(): array
+    {
+        return ['firstname', 'lastname', 'email', 'id', 'created_at', 'status'];
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @return array
+     */
+    public function getUserDataTableTabs(): array
+    {
+        $this->active = $this->getUserCount(['status' => 'active']);
+        $this->pending = $this->getUserCount(['status' => 'pending']);
+        $this->lock = $this->getUserCount(['status' => 'lock']);
+
+        $tabs = [
+            'primary' => ['tab' => 'Primary', 'icon' => 'user', 'value' => $this->active, 'data' => "{$this->pending} New", 'meta' => "{$this->active} active user"],
+            // 'search' => ['tab' => 'Search', 'icon' => 'search', 'value' => $this->active, 'data' => "", 'meta' => "{$this->active} results"],
+            'pending' => ['tab' => 'Pending', 'icon' => 'warning', 'value' => $this->pending, 'data' => '', 'meta' => "{$this->pending} awaiting."],
+            'lock' => ['tab' => 'Lock', 'icon' => 'lock', 'value' => $this->lock, 'data' => '', 'meta' => "{$this->lock} account locked"],
+        ];
+
+        return $tabs;
+
+    }
+
+
+}

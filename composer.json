@@ -1,0 +1,59 @@
+{
+    "name": "ikonc/ikonizer",
+    "description": "IkonizerCore Application for PHP Framework",
+    "keywords": ["framework", "php core", "ikonizer","php"],
+    "type": "library",
+    "license": "MIT",
+    "readme": "",
+    "time": "2020-12-25",
+    "support":{
+        "issues": "hhttps://github.com/ikoncoders/ikonizer/issues",
+        "source": "https://github.com/ikoncoders/ikonizer",
+        "wiki": "https://github.com/ikoncoders/ikonizer/wiki"
+    },   
+    "authors": [
+        {
+            "name": "Ikoncoders",
+            "email": "ikoncoders@gmail.com",
+            "role": "Developer"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "php": "7.4.12|^8.0",
+        "vlucas/phpdotenv": "^5.5",
+        "symfony/var-dumper": "^6.3",
+        "ext-mbstring": "*",
+        "ext-iconv": "*",
+        "ext-pdo": "*",
+        "ext-json": "*",
+        "ext-curl": "*",
+        "ext-imap": "*",
+        "ext-simplexml": "*",
+        "symfony/yaml": "^5.2",
+        "symfony/http-foundation": "^5.2",
+        "paragonie/anti-csrf": "^2.3",
+        "symfony/dotenv": "^5.2",
+        "flatbase/flatbase": "^0.4.1",
+        "symfony/console": "^5.3",
+        "phpmailer/phpmailer": "^6.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "IkonizerCore\\": "src/"
+        },
+        "files": []
+    },
+    "autoload-dev":{
+        "psr-4":{
+            "IkonizerCore\\Tests\\": "tests/"
+        }
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.0",
+        "mockery/mockery": "^1.4"
+    },
+    "suggest": {
+        "paragonise/anti-csrf": "Added for csrf form protection"
+    }
+}

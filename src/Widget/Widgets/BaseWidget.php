@@ -1,0 +1,95 @@
+<?php
+
+declare(strict_types=1);
+
+namespace IkonizerCore\Widget\Widgets;
+
+use Closure;
+use IkonizerCore\Widget\Exception\WidgetException;
+
+class BaseWidget
+{
+
+    use BaseWidgetTrait;
+
+    /**
+     * Base card widget wrapper for all card based widgets within this cards directory
+     *
+     * @param Closure|null $callback
+     * @param string|null $cardColor
+     * @return string
+     */
+    public static function card(Closure $callback = null, ?string $cardColor = 'secondary'): string
+    {
+        if (!$callback instanceof Closure) {
+            throw new WidgetException(sprintf('%s is not a Closure', $callback));
+        }
+        $html = '<div class="uk-card uk-card-' . $cardColor . ' uk-card-body">';
+        $html .= $callback(new self);
+        $html .= '</div>';
+
+        return $html;
+    }
+
+    /**
+     * off-canvas slide out panel
+     *
+     * @param Closure|null $callback
+     * @param string|null $trigger
+     * @return string
+     */
+    public static function offCanvas(Closure $callback = null, ?string $trigger): string
+    {
+        if (!$callback instanceof Closure) {
+            throw new WidgetException(sprintf('%s is not a Closure', $callback));
+        }
+        $html = '<div id="' . $trigger . '" uk-offcanvas="flip: true; overlay: true">';
+            $html .= '<div class="uk-offcanvas-bar uk-background-secondary">';
+                $html .= '<button class="uk-offcanvas-close" type="button" uk-close></button>';
+                $html .= $callback(new self);
+            $html .= '</div>';
+        $html .= '</div>';
+
+        return $html;
+    }
+
+    /**
+     * Base card widget wrapper for all card based widgets within this cards directory
+     *
+     * @param Closure|null $callback
+     * @param string|null $cardColor
+     * @return string
+     */
+    public static function blankWrapper(Closure $callback = null): string
+    {
+        if (!$callback instanceof Closure) {
+            throw new WidgetException(sprintf('%s is not a Closure', $callback));
+        }
+       // $html = '<div class="uk-card uk-card-' . $cardColor . ' uk-card-body">';
+        return $callback(new self);
+        //$html .= '</div>';
+
+    }
+
+    /**
+     * Base card widget wrapper for all card based widgets within this cards directory
+     *
+     * @param Closure|null $callback
+     * @param string|null $cardColor
+     * @return string
+     */
+    public static function gridWrapper(Closure $callback = null, string $columns = null): string
+    {
+        if (!$callback instanceof Closure) {
+            throw new WidgetException(sprintf('%s is not a Closure', $callback));
+        }
+        $html = '<div class="uk-grid uk-grid-divider uk-grid-medium uk-child-width-1-2 uk-child-width-1-4@l uk-child-width-1-5@xl uk-margin uk-padding-small" data-uk-grid>';
+        $html .= $callback(new self);
+        $html .= '</div>';
+
+        return $html;
+
+    }
+
+
+}

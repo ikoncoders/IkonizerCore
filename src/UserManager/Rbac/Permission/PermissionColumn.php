@@ -1,0 +1,163 @@
+<?php
+
+declare(strict_types=1);
+
+namespace IkonizerCore\UserManager\Rbac\Permission;
+
+use IkonizerCore\Datatable\DataColumnTrait;
+use IkonizerCore\Datatable\AbstractDatatableColumn;
+
+class PermissionColumn extends AbstractDatatableColumn
+{
+
+    use DataColumnTrait;
+
+    private string $controller = 'permission';
+
+    /**
+     * @param array $dbColumns
+     * @param object|null $callingController
+     * @return array[]
+     */
+    public function columns(array $dbColumns = [], object|null $callingController = null): array
+    {
+        return [
+            [
+                'db_row' => 'id',
+                'dt_row' => 'ID',
+                'class' => 'uk-table-shrink',
+                'show_column' => true,
+                'sortable' => false,
+                'searchable' => true,
+                'formatter' => function ($row) {
+                    return '<input type="checkbox" class="uk-checkbox" id="permissions-' . $row['id'] . '" name="id[]" value="' . $row['id'] . '">';
+                }
+            ],
+            [
+                'db_row' => 'permission_name',
+                'dt_row' => 'Name',
+                'class' => '',
+                'show_column' => true,
+                'sortable' => true,
+                'searchable' => true,
+                'formatter' => function ($row, $tempExt) {
+                    $html = '<div class="uk-clearfix">';
+                    $html .= '<div class="uk-float-left uk-margin-small-right">';
+                    $html .= '<span uk-tooltip="' . $row['permission_description'] . '" class="uk-text-teal" uk-icon="icon: info"></span>';
+                    $html .= '</div>';
+                    $html .= '<div class="uk-float-left">';
+                    $html .= $row["permission_name"] . "<br/>";
+                    $html .= '<div class="uk-text-truncate uk-width-3-4"><small>' . $row["permission_description"] . '</small></div>';
+                    $html .= '</div>';
+                    $html .= '</div>';
+
+                    return $html;
+                }
+            ],
+            [
+                'db_row' => 'permission_description',
+                'dt_row' => 'Description',
+                'class' => '',
+                'show_column' => false,
+                'sortable' => false,
+                'searchable' => false,
+                'formatter' => ''
+            ],
+            [
+                'db_row' => 'resource_group',
+                'dt_row' => 'Group',
+                'class' => '',
+                'show_column' => true,
+                'sortable' => false,
+                'searchable' => false,
+                'formatter' => function($row, $tempExt) use ($callingController) {
+                    return $row['resource_group'] ?? 'Not Set';
+                }
+            ],
+            [
+                'db_row' => 'created_at',
+                'dt_row' => 'Published',
+                'class' => '',
+                'show_column' => true,
+                'sortable' => true,
+                'searchable' => false,
+                'formatter' => function ($row, $tempExt) {
+                    return sprintf(
+                        '<span uk-tooltip="By Admin">%s</span>', 
+                        $tempExt->tableDateFormat($row, "created_at")
+                    );
+                }
+            ],
+            [
+                'db_row' => 'modified_at',
+                'dt_row' => 'Modified',
+                'class' => '',
+                'show_column' => true,
+                'sortable' => true,
+                'searchable' => false,
+                'formatter' => function ($row, $tempExt) {
+                    if (isset($row["modified_at"]) && $row["modified_at"] != null) {
+                        return sprintf(
+                            '<span uk-tooltip="By Admin">%s</span>', 
+                            $tempExt->tableDateFormat($row, "modified_at")
+                        );
+                    } else {
+                        return '<small>Never!</small>';
+                    }
+                }
+            ],
+            [
+                'db_row' => '',
+                'dt_row' => 'Action',
+                'class' => '',
+                'show_column' => true,
+                'sortable' => false,
+                'searchable' => false,
+                'formatter' => function ($row, $tempExt) {
+                    return $tempExt->action(
+                        [
+                            'more' => [
+                                'icon' => 'more',
+                                'callback' => function ($row, $tempExt) {
+                                    return $tempExt->getDropdown(
+                                        $this->columnActions($row, $this->controller),
+                                        '',
+                                        $row,
+                                        $this->controller,
+                                        ['can_view_permission']
+                                    );
+                                }
+                            ],
+                        ],
+                        $row,
+                        $tempExt,
+                        $this->controller,
+                        false,
+                        'Are You Sure!',
+                        "You are about to carry out an irreversable action. Are you sure you want to delete <strong class=\"uk-text-danger\">{$row['permission_name']}</strong> role."
+                    );
+                }
+            ],
+
+        ];
+    }
+
+    /**
+     * @inheritDoc
+     *
+     * @param array $row
+     * @param string|null $controller
+     * @param object|null $tempExt
+     * @return array
+     */
+    public function columnActions(array $row = [], ?string $controller = null, ?object $tempExt = null): array
+    {
+        return $this->filterColumnActions(
+            $row, 
+            $this->columnBasicLinks($this, $row), /* can merge additional links here to this column */
+            $controller
+        );
+    }
+
+
+}

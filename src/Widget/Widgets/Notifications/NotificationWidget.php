@@ -1,0 +1,211 @@
+<?php
+
+
+declare(strict_types=1);
+
+namespace IkonizerCore\Widget\Widgets\Notifications;
+
+use IkonizerCore\IconLibrary;
+use IkonizerCore\Widget\Widget;
+use IkonizerCore\Widget\Widgets\BaseWidget;
+use IkonizerCore\Widget\Widgets\WidgetBuilderInterface;
+use IkonizerCore\DataObjectLayer\ClientRepository\ClientRepositoryInterface;
+
+class NotificationWidget extends Widget implements WidgetBuilderInterface
+{
+
+    /* @var string the widget name */
+    public const WIDGET_NAME = 'notification_widget';
+
+    /**
+     * Render the widget
+     *
+     * @param string|null $widgetName
+     * @param ClientRepositoryInterface $clientRepo
+     * @param BaseWidget $baseWidget
+     * @return string
+     */
+    public static function render(?string $widgetName = null, ClientRepositoryInterface $clientRepo, BaseWidget $baseWidget, mixed $widgetData = null): string
+    {
+        if ($widgetName === self::WIDGET_NAME) {
+            $widgetID = (isset($widgetData) && is_array($widgetData) && array_key_exists('id', $widgetData)) ? $widgetData['id'] : '';
+            return $baseWidget::offCanvas(
+                function($base) use ($clientRepo, $widgetID, $widgetData) {
+                    return sprintf('%s', self::notifier($clientRepo, $widgetData));
+                },
+                $widgetID
+            );
+        }
+    }
+
+    private static function notifier(object $clientRepo = null, mixed $widgetData)
+    {
+        return sprintf('
+          <div>
+            <div class="uk-card-header">
+                <div class="uk-grid-small uk-flex-middle" uk-grid>
+                    <div class="uk-width-auto">
+                        %s
+                    </div>
+                    <div class="uk-width-expand">
+                        <h3 class="uk-card-title uk-text-bolder uk-margin-remove-bottom">Notifications</h3>
+                        <p class="uk-text-meta uk-margin-remove-top">
+                            <time datetime="2016-04-01T19:00">Last updated 30min ago</time>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="uk-card-body uk-padding-small">
+            %s
+            </div>
+            %s
+        </div>',
+            IconLibrary::getIcon('bell', 3.5),
+            self::resolveNotifierLists($clientRepo, $widgetData),
+            self::panelAction($clientRepo)
+        );
+
+
+    }
+
+    private static function resolveNotifierLists(object $clientRepo = null, mixed $widgetData)
+    {
+        $limit = (isset($widgetData) && is_array($widgetData) && array_key_exists('limit', $widgetData)) ? $widgetData['limit'] : '';
+        $orderby = (isset($widgetData) && is_array($widgetData) && array_key_exists('orderby', $widgetData)) ? $widgetData['orderby'] : '';
+        $notifier = $clientRepo->getClientCrud()->read(['notify_title', 'notify_description', 'id'], ['notify_status' => 'unread'], ['limit' => $limit, 'offset' => 0], ['orderby' => $orderby]);
+        $html = '';
+        $html .= '<ul uk-tab>';
+            $html .= '<li><a uk-tooltip="System Notifications" href="#">' . IconLibrary::getIcon('server') . '</a></li>';
+            $html .= '<li><a uk-tooltip="Members Notifications" href="#">' . IconLibrary::getIcon('users') . '</a></li>';
+            $html .= '<li><a uk-tooltip="Errors Notifications" href="#">' . IconLibrary::getIcon('bolt') . '</a></li>';
+
+        $html .= '</ul>';
+
+        $html .= '<ul class="uk-switcher uk-margin">';
+            $html .= '<li>';
+                if (count($notifier) > 0) {
+                    $html .= '<ul class="uk-list uk-list-divider">';
+                        $count = 0;
+                        $num = 0;
+                        foreach ($notifier as $key => $value) {
+                            $num++;
+                            $html .= '<li><a class="uk-link-reset" href="/admin/notification/' . $value['id'] . '/show">' . $value['notify_description'] . ' @ ' . $value['created_at'] . '</a></li>';
+                            $count++;
+                            if ($count === 3) {
+                                break;
+                            }
+                        }
+                    $html .= '</ul>';
+                } else {
+                    $html .= 'No new notifications';
+                }
+            $html .= '</li>';
+            $html .= '<li>
+            <div class="uk-width-1-1@s">
+            <ul class="uk-list uk-list-collapse uk-text-meta">
+                <li>
+                    <div class="uk-clearfix">
+                        <span class="uk-float-left uk-margin-right uk-thumbnav"><img src="/public/assets/images/undraw_profile_1.svg" width="50" height="50"><sup class="uk-text-success uk-text-large">.</sup></span>
+                        <div class="uk-float-left">
+                            <span class="uk-display-block">Ricardo Miller</span>
+                            <span class="uk-text-middle"><a href="#">New Message.</a></span>
+                            <hr>
+                        </div>
+                    </div>
+                </li>
+                <li>
+                <div class="uk-clearfix">
+                    <span class="uk-float-left uk-margin-right uk-thumbnav"><img src="/public/assets/images/undraw_profile_2.svg" width="50" height="50"><sup class="uk-text-success uk-text-large">.</sup></span>
+                <div class="uk-float-left">
+                        <span class="uk-display-block">Jane Doe</span>
+                        <span class="uk-text-middle"><a href="#">Response Requested</a></span>
+                        <hr>
+                    </div>
+                </div>
+            </li>
+            <li>
+            <div class="uk-clearfix">
+                <span class="uk-float-left uk-margin-right uk-thumbnav"><img src="/public/assets/images/undraw_profile_3.svg" width="50" height="50"><sup class="uk-text-warning uk-text-large">.</sup></span>
+            <div class="uk-float-left">
+                    <span class="uk-display-block">Jim Gallows</span>
+                    <span class="uk-text-middle"><a class="" href="#">New ticket assigned.</a></span>
+                    <hr>
+                </div>
+            </div>
+        </li>
+        <li>
+        <div class="uk-clearfix">
+            <span class="uk-float-left uk-margin-right uk-thumbnav"><img src="/public/assets/images/undraw_profile_1.svg" width="50" height="50"><sup class="uk-text-warning uk-text-large">.</sup></span>
+        <div class="uk-float-left">
+                <span class="uk-display-block">Jim Gallows</span>
+                <span class="uk-text-middle"><a href="#">Created new ticket #3452.</a></span>
+                <hr>
+            </div>
+        </div>
+    </li>
+    <li>
+    <div class="uk-clearfix">
+        <span class="uk-float-left uk-margin-right uk-thumbnav"><img src="/public/assets/images/undraw_profile_2.svg" width="50" height="50"><sup class="uk-text-warning uk-text-large">.</sup></span>
+    <div class="uk-float-left">
+            <span class="uk-display-block">Jim Gallows</span>
+            <span class="uk-text-middle"><a href="#">Recently logged out.</a></span>
+            <hr>
+        </div>
+    </div>
+</li>
+
+            </ul>
+        </div>    
+
+
+        
+        </li>';
+        $html .= '</ul>';
+        $html .= '
+        <div class="left-content-box uk-margin-top">
+            
+        <h5>Daily Reports</h5>
+        <div>
+            <span class="uk-text-small">Traffic <small>(+50)</small></span>
+            <progress class="uk-progress" value="50" max="100"></progress>
+        </div>
+        <div>
+            <span class="uk-text-small">Income <small>(+78)</small></span>
+            <progress class="uk-progress success" value="78" max="100"></progress>
+        </div>
+        <div>
+            <span class="uk-text-small">Feedback <small>(-12)</small></span>
+            <progress class="uk-progress warning" value="12" max="100"></progress>
+        </div>
+    
+</div>
+
+        ';
+        return $html;
+
+    }
+
+    private static function panelAction(object $clientRepo = null)
+    {
+        // return sprintf(
+        //     '
+        //     <div class="uk-position-bottom uk-margin">
+        //        <div class="uk-position-center">
+        //             <ul class="uk-iconnav">
+        //                 <li><a uk-tooltip="Notification Settings" class="uk-link-reset" href="/admin/notification/settings">%s</a></li>
+        //                 <li><a uk-tooltip="Clear All" class="uk-link-reset" href="#">%s</a></li>
+        //                 <li><a uk-tooltip="View All" class="uk-link-reset" href="#">%s <sup class="uk-badge">%s</sup></a></li>
+        //             </ul>               
+        //         </div>
+        //     </div>
+            
+        //     ',
+        //     IconLibrary::getIcon('cog', 1.0),
+        //     IconLibrary::getIcon('trash', 1.0),
+        //     IconLibrary::getIcon('bell', 1.0),
+        //     $clientRepo->getClientCrud()->countRecords(['notify_status' => 'unread'])
+        // );
+    }
+
+
+}

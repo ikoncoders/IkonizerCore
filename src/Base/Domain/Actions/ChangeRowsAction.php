@@ -1,0 +1,84 @@
+<?php
+declare(strict_types=1);
+
+namespace IkonizerCore\Base\Domain\Actions;
+
+use IkonizerCore\Utility\Serializer;
+use IkonizerCore\Base\Domain\DomainTraits;
+use IkonizerCore\Base\Domain\DomainActionLogicInterface;
+
+/**
+ * Class which handles the domain logic when adding a new item to the database
+ * items are sanitize and validated before persisting to database. The class will
+ * also dispatched any validation error before persistence. The logic also implements
+ * event dispatching which provide usable data for event listeners to perform other
+ * necessary tasks and message flashing
+ */
+class ChangeRowsAction implements DomainActionLogicInterface
+{
+
+    use DomainTraits;
+
+    /**
+     * execute logic for adding new items to the database()
+     *
+     * @param Object $controller - The controller object implementing this object
+     * @param string|null $entityObject
+     * @param string|null $eventDispatcher - the eventDispatcher for the current object
+     * @param string|null $objectSchema
+     * @param string $method - the name of the method within the current controller object
+     * @param array $rules
+     * @param array $additionalContext - additional data which can be passed to the event dispatcher
+     * $param mixed $optional - an optional parameter that accepts any datatype pass to it
+     * @return DeleteAction
+     */
+    public function execute(
+        object $controller,
+        ?string $entityObject,
+        ?string $eventDispatcher,
+        ?string $objectSchema,
+        string $method,
+        array $rules = [],
+        array $additionalContext = [],
+        mixed $optional = null
+    ): self {
+
+        $this->controller = $controller;
+        $this->method = $method;
+        $this->schema = $objectSchema;
+        $formBuilder = $controller->formBuilder;
+
+        if (isset($formBuilder) && $formBuilder?->canHandleRequest()) :
+
+            $formData = $formBuilder->getData();
+            $oldSession = $controller->controllerSessionData($controller);
+            /* Unset the old key and value */
+            unset($oldSession['records_per_page']);
+            /* push the new value back onto the old session array */
+            array_push($oldSession, ['records_per_page' => (int)$formData['records_per_page']]);
+
+            /* flush the session then re-populate */
+            $key = $controller->thisRouteController() . '_settings';
+            $session = $controller->getSession();
+            if ($session->has($key)) {
+                $session->delete($key);
+
+                /* serialized the modified array */
+                $session->set($key, Serializer::compress($oldSession));
+                $controller->flashMessage('Changes saved');
+                $controller->redirect('/admin/user/index');
+                // $this->dispatchSingleActionEvent(
+                //     $controller,
+                //     $eventDispatcher,
+                //     $method,
+                //     ['controller_name' => $formData['controller_name']],
+                //     $additionalContext
+                // );
+
+            }
+        endif;
+        return $this;
+    }
+}
+
+
