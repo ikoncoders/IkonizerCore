@@ -133,7 +133,6 @@ class AdminController extends BaseController
                 'importForm' => ImportForm::class,
                 'exportAction' => ExportAction::class,
                 'importAction' => ImportAction::class,
-
             ]
         );
 

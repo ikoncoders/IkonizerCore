@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace IkonizerCore\Ash\Components\Bootstrap;
@@ -46,7 +45,6 @@ class BsNavigationExtension
             }
             ($wrapper === true) ? '</ul>' . PHP_EOL : false;
         }
-
         return $this->element;
     }
 

@@ -1,6 +1,4 @@
 <?php
-
-
 declare (strict_types=1);
 
 namespace IkonizerCore\Administrator\Controller;
@@ -88,7 +86,6 @@ class DiscoveryController extends AdminController
             } else {
                 $this->flashMessage('No controller was discovered', $this->flashWarning());
                 $this->redirect('/admin/discovery/discover');
-
             }
 
         endif;
@@ -111,7 +108,6 @@ class DiscoveryController extends AdminController
             $this->updateMethods($controllerID, $discoveryMethods, $unSerializeMethods);
             $this->flashMessage(sprintf('[%s] method added to the database methods list', count($discoveryMethods)));
             $this->redirect(sprintf('/admin/discovery/discover?edit=%s', $controllerID));
-
         }
     }
 
@@ -138,11 +134,8 @@ class DiscoveryController extends AdminController
                         );
                 }
             }
-
         }
-
         return false;
-
     }
 
 }

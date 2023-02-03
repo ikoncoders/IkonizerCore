@@ -29,7 +29,6 @@ class SupportController extends \IkonizerCore\Administrator\Controller\AdminCont
                 'commander' => SupportCommander::class,
                 'repository' => SupportModel::class,
                 'repo' => SupportRepository::class,
-
             ]
         );
 

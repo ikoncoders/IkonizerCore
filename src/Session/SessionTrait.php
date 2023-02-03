@@ -1,21 +1,13 @@
 <?php
-/*
- * This file is part of the MagmaCore package.
- *
- * (c) Ricardo Miller <ricardomiller@lava-studio.co.uk>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
 
 declare(strict_types=1);
 
-namespace MagmaCore\Session;
+namespace IkonizerCore\Session;
 
 use LogicException;
-use MagmaCore\Session\Exception\SessionException;
-use MagmaCore\Session\GlobalManager\GlobalManager;
-use MagmaCore\Session\GlobalManager\GlobalManagerException;
+use IkonizerCore\Session\Exception\SessionException;
+use IkonizerCore\Session\GlobalManager\GlobalManager;
+use IkonizerCore\Session\GlobalManager\GlobalManagerException;
 
 trait SessionTrait
 {

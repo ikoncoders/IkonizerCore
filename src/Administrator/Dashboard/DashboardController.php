@@ -43,7 +43,6 @@ class DashboardController extends \IkonizerCore\Administrator\Controller\AdminCo
                 'dashboardSettingsForm' => DashboardSettingsForm::class
             ]
         );
-
     }
 
     public function schemaAsString(): string

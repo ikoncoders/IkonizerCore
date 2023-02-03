@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace IkonizerCore\Administrator\Forms;
@@ -14,7 +13,6 @@ use IkonizerCore\FormBuilder\FormBuilderBlueprintInterface;
 
 class ImportForm extends ClientFormBuilder implements ClientFormBuilderInterface
 {
-
     use SessionSettingsTrait;
 
     /** @var FormBuilderBlueprintInterface $blueprint */

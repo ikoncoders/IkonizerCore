@@ -41,3 +41,4 @@ class UikitSimplePaginationExtension
 //        return $html;
 
 }
+}
