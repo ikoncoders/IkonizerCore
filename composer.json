@@ -1,5 +1,5 @@
 {
-    "name": "ikonc/ikonizer",
+    "name": "ikonconders/ikonizer",
     "description": "IkonizerCore Application for PHP Framework",
     "keywords": ["framework", "php core", "ikonizer","php"],
     "type": "library",
