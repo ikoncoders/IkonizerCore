@@ -1,5 +1,5 @@
 {
-    "name": "ikonconders/ikonizer",
+    "name": "ikoncoders/ikonizercore",
     "description": "IkonizerCore Application for PHP Framework",
     "keywords": ["framework", "php core", "ikonizer","php"],
     "type": "library",
@@ -7,9 +7,9 @@
     "readme": "",
     "time": "2020-12-25",
     "support":{
-        "issues": "hhttps://github.com/ikoncoders/ikonizer/issues",
-        "source": "https://github.com/ikoncoders/ikonizer",
-        "wiki": "https://github.com/ikoncoders/ikonizer/wiki"
+        "issues": "hhttps://github.com/ikoncoders/IkonizerCore/issues",
+        "source": "https://github.com/ikoncoders/IkonizerCore",
+        "wiki": "https://github.com/ikoncoders/IkonizerCore/wiki"
     },   
     "authors": [
         {
